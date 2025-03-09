@@ -1,0 +1,74 @@
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./app:/var/www/html
+      - ./nginx/templates:/etc/nginx/templates
+    environment:
+      DOMAIN: ${DOMAIN:?Provide the domain name in .env file}
+      APP_SPECIFIC_DOCROOT: ${APP_SPECIFIC_DOCROOT}
+    depends_on:
+      - phpfpm
+    networks:
+      - app-network
+
+  phpfpm:
+    build:
+      context: .
+      dockerfile: Dockerfile-php
+    volumes:
+      - ./app:/var/www/html
+      - composer-cache:/tmp/composer
+    environment:
+      DB_HOST: "db"
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+    networks:
+      - app-network
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Provide the Postgres username in .env file}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Provide the Postgres password in .env file}
+      POSTGRES_DB: ${POSTGRES_DB:?Provide the Postgres DB name in .env file}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:?Provide the PGAdmin email in .env file}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:?Provide the PGAdmin password in .env file}
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:management
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?Provide the RabbitMQ username in .env file}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?Provide the RabbitMQ password in .env file}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  composer-cache:
+
+networks:
+  app-network:
+    driver: bridge

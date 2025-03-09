@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# Inspired from https://github.com/markshust/docker-magento
+
+if docker compose version > /dev/null 2>&1; then
+  DOCKER_COMPOSE="docker compose"
+else
+  DOCKER_COMPOSE="docker-compose"
+fi
+
+${DOCKER_COMPOSE} "$@"

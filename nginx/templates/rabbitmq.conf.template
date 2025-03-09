@@ -1,0 +1,9 @@
+server {
+    listen 80;
+    server_name rabbitmq.${DOMAIN};
+
+    location / {
+        proxy_pass http://rabbitmq:15672;
+        proxy_set_header Host $host;
+    }
+}

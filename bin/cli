@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# Inspired from https://github.com/markshust/docker-magento
+
+[ -z "$1" ] && echo "Please specify a CLI command (ex. ls)" && exit
+bin/docker-compose exec phpfpm "$@"

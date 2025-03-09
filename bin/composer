@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# Inspired from https://github.com/markshust/docker-magento
+
+bin/cli composer "$@"
